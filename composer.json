@@ -1,0 +1,14 @@
+{
+    "name": "hyper-php",
+    "description": "Support Functonal Programing for PHP",
+    "keywords": ["hyper-php"],
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hyper\\": "src/Hyper"
+        }
+    }
+}
