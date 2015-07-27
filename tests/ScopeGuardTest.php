@@ -6,7 +6,7 @@ class ScopeGuardTest extends PHPUnit_Framework_TestCase
 {
     public static $stack = [];
 
-    public function testScopeGuard()
+    public function testGuard()
     {
         self::$stack = [];
         $this->assertEmpty(self::$stack);
@@ -17,9 +17,9 @@ class ScopeGuardTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testScopeGuard
+     * @depends testGuard
      */
-    public function testScopeGuardCalledCheck()
+    public function testCalledCheck()
     {
         $this->assertNotEmpty(self::$stack);
         $this->assertSame('guard is called', array_pop(self::$stack));
@@ -27,9 +27,9 @@ class ScopeGuardTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testScopeGuardCalledCheck
+     * @depends testCalledCheck
      */
-    public function testScopeGuardCancel()
+    public function testCancel()
     {
         self::$stack = [];
         $this->assertEmpty(self::$stack);
@@ -41,9 +41,9 @@ class ScopeGuardTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testScopeGuardCancel
+     * @depends testCancel
      */
-    public function testScopeGuardCancelCheck()
+    public function testCancelCheck()
     {
         $this->assertEmpty(self::$stack);
     }

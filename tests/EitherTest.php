@@ -249,5 +249,11 @@ class EitherTest extends PHPUnit_Framework_TestCase
         ));
     }
 
+    public function testExists()
+    {
+        $this->assertTrue(Either::Right(1)->exists(function ($x) { return $x === 1; }));
+        $this->assertTrue(Either::Left("test")->exists(function ($x) { return $x === "test"; }));
+        $this->assertFalse(Either::Right(10)->exists(function ($x) { return $x === 1; }));
+        $this->assertFalse(Either::Left("test")->exists(function ($x) { return $x === "tes"; }));
+    }
 }
-

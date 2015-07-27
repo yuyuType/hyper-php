@@ -4,7 +4,7 @@ use Hyper\Benchmark;
 
 class BenchmarkTest extends PHPUnit_Framework_TestCase
 {
-    public function testBenchmark()
+    public function testMeasure()
     {
         $time = Benchmark::measure(function () {
         //    sleep(1);

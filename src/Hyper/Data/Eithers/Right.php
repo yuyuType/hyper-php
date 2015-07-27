@@ -197,4 +197,16 @@ class Right implements IEither
         }
         throw new \LogicException("You must set caseRight parameter.");
     }
+
+    /**
+     *
+     * {@inheritdoc}
+     *
+     * @param callable $pred 条件関数
+     * @return bool
+     */
+    public function exists(callable $pred)
+    {
+        return call_user_func($pred, $this->value);
+    }
 }

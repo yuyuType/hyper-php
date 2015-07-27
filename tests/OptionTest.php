@@ -236,5 +236,10 @@ class OptionTest extends PHPUnit_Framework_TestCase
         ));
     }
 
-}
-
+    public function testExists()
+    {
+        $this->assertTrue(Option::Some(1)->exists(function ($x) { return $x === 1; }));
+        $this->assertFalse(Option::Some(10)->exists(function ($x) { return $x === 1; }));
+        $this->assertFalse(Option::None()->exists(function ($x) { return $x === 1; }));
+    }
+ }

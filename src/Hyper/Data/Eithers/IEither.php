@@ -240,4 +240,12 @@ interface IEither
      * @throws \LogicException CaseLeft|CaseRightクラスのインスタンスがパラメータにない場合
      */
     public function match();
+
+    /**
+     * 条件に一致した値を保持しているか判定する関数
+     *
+     * @param callable $pred 条件関数
+     * @return bool
+     */
+    public function exists(callable $pred);
 }

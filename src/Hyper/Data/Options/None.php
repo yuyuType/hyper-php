@@ -154,4 +154,15 @@ class None implements IOption
         }
         throw new \LogicException("You must set caseNone parameter.");
     }
-}
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param callable $pred 条件関数
+     * @return bool
+     */
+    public function exists(callable $pred)
+    {
+        return false;
+    }
+ }
