@@ -65,12 +65,12 @@ class StreamTest extends PHPUnit_Framework_TestCase
         $value = (new Stream(range(1, 10)))
             ->filter(function ($x) { return $x % 2 === 0; })
             ->get();
-        $this->assertSame([2, 4, 6, 8, 10], iterator_to_array($value));
+        $this->assertSame([2, 4, 6, 8, 10], array_values(iterator_to_array($value)));
 
         $value = (new Stream(new ArrayIterator([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])))
             ->filter(function ($x) { return $x % 2 === 0; })
             ->get();
-        $this->assertSame([2, 4, 6, 8, 10], iterator_to_array($value));
+        $this->assertSame([2, 4, 6, 8, 10], array_values(iterator_to_array($value)));
 
         $value = (new Stream("test"))
             ->filter(function ($c) { return $c === "t"; })
@@ -102,5 +102,41 @@ class StreamTest extends PHPUnit_Framework_TestCase
         $result = $stream->bind('array_map', function ($x) { return $x * 2; })
             ->get();
         $this->assertSame([2, 4, 6, 8, 10], $result);
+    }
+
+    public function testTail()
+    {
+        $stream = new Stream([]);
+        $result = $stream->tail()
+            ->toArray();
+        $this->assertSame([], $result);
+
+        $stream = new Stream(range(1, 5));
+        $result = $stream->tail()
+            ->toArray();
+        $this->assertSame([1 => 2, 2 => 3, 3 => 4, 4 => 5], $result);
+
+        $stream = new Stream(['val1' => 1, 'val2' => 2, 'val3' => 3]);
+        $result = $stream->tail()
+            ->toArray();
+        $this->assertSame(['val2' => 2, 'val3' => 3], $result);
+    }
+
+    public function testInit()
+    {
+        $stream = new Stream([]);
+        $result = $stream->init()
+            ->toArray();
+        $this->assertSame([], $result);
+
+        $stream = new Stream(range(1, 5));
+        $result = $stream->init()
+            ->toArray();
+        $this->assertSame([1, 2, 3, 4], $result);
+
+        $stream = new Stream(['val1' => 1, 'val2' => 2, 'val3' => 3]);
+        $result = $stream->init()
+            ->toArray();
+        $this->assertSame(['val1' => 1, 'val2' => 2], $result);
     }
 }

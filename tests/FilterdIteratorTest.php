@@ -1,6 +1,6 @@
 <?php
 
-use Hyper\Data\Enumerator\FilterdIterator;
+use Hyper\Data\Collections\FilterdIterator;
 
 class FilterdIteratorTest extends PHPUnit_Framework_TestCase
 {

@@ -1,29 +1,29 @@
 <?php
 /**
- * Enumerable::filterが返すIterator
+ * Collection::mapが返すIterator
  *
  * @package Hyper
  * @author yuyuType
  * @link https://github.com/yuyuType/hyper-php
  */
 
-namespace Hyper\Data\Enumerator;
+namespace Hyper\Data\Collections;
 
 /**
- * Enumerable::filterが返すFilterdIterator
+ * Collection::mapが返すMapIterator
  *
  * @author yuyuType
  */
-class FilterdIterator implements \IteratorAggregate, \ArrayAccess, \Countable
+class MapIterator implements \IteratorAggregate, \ArrayAccess, \Countable
 {
-    /** 条件関数 */
+    /** 写像関数 */
     private $f;
 
-    /** イテレータ */
+    /** 写像先のイテレータ */
     private $iterator;
 
     /**
-     * 条件関数とイテレータを受け取る
+     * 写像関数と写像先イテレータを受け取る
      *
      * @param callable $f mixed f(mixed $x)
      * @param Traversable $iterator 写像先イテレータ
@@ -38,14 +38,12 @@ class FilterdIterator implements \IteratorAggregate, \ArrayAccess, \Countable
     /**
      * IteratorAggregateインタフェースの実装
      *
-     * @return FilterdIterator フィルタしたイテレータ
+     * @return MapIterator 写像したイテレータ
      */
     public function getIterator()
     {
         foreach ($this->iterator as $value) {
-            if (call_user_func($this->f, $value)) {
-                yield $value;
-            }
+            yield call_user_func($this->f, $value);
         }
     }
 
@@ -66,15 +64,7 @@ class FilterdIterator implements \IteratorAggregate, \ArrayAccess, \Countable
      */
     public function offsetExists($offset)
     {
-        $count = 0;
-        foreach ($this->iterator as $value) {
-            if (call_user_func($this->f, $value)) {
-                if ($count++ === $offset) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return $this->iterator->offsetExists($offset);
     }
 
     /**
@@ -90,19 +80,11 @@ class FilterdIterator implements \IteratorAggregate, \ArrayAccess, \Countable
     /**
      * ArrayAccessインタフェースの実装
      *
-     * @return mixed 写像関数の戻り値
+     * @return $mixed 写像関数の戻り値
      */
     public function offsetGet($offset)
     {
-        $count = 0;
-        foreach ($this->iterator as $value) {
-            if (call_user_func($this->f, $value)) {
-                if ($count++ === $offset) {
-                    return $value;
-                }
-            }
-        }
-        return null;
+        return call_user_func($this->f, $this->iterator->offsetGet($offset));
     }
 
     /**
@@ -112,12 +94,6 @@ class FilterdIterator implements \IteratorAggregate, \ArrayAccess, \Countable
      */
     public function count()
     {
-        $count = 0;
-        foreach ($this->iterator as $value) {
-            if (call_user_func($this->f, $value)) {
-                ++$count;
-            }
-        }
-        return $count;
+        return iterator_count($this->iterator);
     }
 }

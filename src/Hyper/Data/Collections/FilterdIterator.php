@@ -1,29 +1,29 @@
 <?php
 /**
- * Enumerable::mapが返すIterator
+ * Collection::filterが返すIterator
  *
  * @package Hyper
  * @author yuyuType
  * @link https://github.com/yuyuType/hyper-php
  */
 
-namespace Hyper\Data\Enumerator;
+namespace Hyper\Data\Collections;
 
 /**
- * Enumerable::mapが返すMapIterator
+ * Collection::filterが返すFilterdIterator
  *
  * @author yuyuType
  */
-class MapIterator implements \IteratorAggregate, \ArrayAccess, \Countable
+class FilterdIterator implements \IteratorAggregate, \ArrayAccess, \Countable
 {
-    /** 写像関数 */
+    /** 条件関数 */
     private $f;
 
-    /** 写像先のイテレータ */
+    /** イテレータ */
     private $iterator;
 
     /**
-     * 写像関数と写像先イテレータを受け取る
+     * 条件関数とイテレータを受け取る
      *
      * @param callable $f mixed f(mixed $x)
      * @param Traversable $iterator 写像先イテレータ
@@ -38,12 +38,14 @@ class MapIterator implements \IteratorAggregate, \ArrayAccess, \Countable
     /**
      * IteratorAggregateインタフェースの実装
      *
-     * @return MapIterator 写像したイテレータ
+     * @return FilterdIterator フィルタしたイテレータ
      */
     public function getIterator()
     {
         foreach ($this->iterator as $value) {
-            yield call_user_func($this->f, $value);
+            if (call_user_func($this->f, $value)) {
+                yield $value;
+            }
         }
     }
 
@@ -64,7 +66,15 @@ class MapIterator implements \IteratorAggregate, \ArrayAccess, \Countable
      */
     public function offsetExists($offset)
     {
-        return $this->iterator->offsetExists($offset);
+        $count = 0;
+        foreach ($this->iterator as $value) {
+            if (call_user_func($this->f, $value)) {
+                if ($count++ === $offset) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -80,11 +90,19 @@ class MapIterator implements \IteratorAggregate, \ArrayAccess, \Countable
     /**
      * ArrayAccessインタフェースの実装
      *
-     * @return $mixed 写像関数の戻り値
+     * @return mixed 写像関数の戻り値
      */
     public function offsetGet($offset)
     {
-        return call_user_func($this->f, $this->iterator->offsetGet($offset));
+        $count = 0;
+        foreach ($this->iterator as $value) {
+            if (call_user_func($this->f, $value)) {
+                if ($count++ === $offset) {
+                    return $value;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -94,6 +112,12 @@ class MapIterator implements \IteratorAggregate, \ArrayAccess, \Countable
      */
     public function count()
     {
-        return iterator_count($this->iterator);
+        $count = 0;
+        foreach ($this->iterator as $value) {
+            if (call_user_func($this->f, $value)) {
+                ++$count;
+            }
+        }
+        return $count;
     }
 }

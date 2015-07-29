@@ -1,10 +1,10 @@
 <?php
 
-namespace Hyper\Data\Enumerator;
+namespace Hyper\Data\Collections;
 
 class StringIterator implements \IteratorAggregate, \ArrayAccess, \Countable {
     private $str;
-    
+
     public function __construct($str) {
         $this->str = $str;
     }

@@ -9,7 +9,7 @@
 
 namespace Hyper;
 
-use Hyper\Enumerable;
+use Hyper\Collection;
 
 /**
  * F#のpipeline oerator, Java Stream APIのエミュレート
@@ -44,7 +44,7 @@ class Stream
      */
     public function head()
     {
-        $this->value = Enumerable::head($this->value);
+        $this->value = Collection::head($this->value);
         return $this;
     }
 
@@ -63,7 +63,45 @@ class Stream
      */
     public function last()
     {
-        $this->value = Enumerable::last($this->value);
+        $this->value = Collection::last($this->value);
+        return $this;
+    }
+
+    /**
+     * tail関数
+     *
+     * 例)
+     *
+     * ``` php
+     * $value = (new Stream([1, 2, 3]))
+     *     ->tail(); // [2, 3]
+     *     ->get();
+     * ```
+     *
+     * @return Stream
+     */
+    public function tail()
+    {
+        $this->value = Collection::tail($this->value);
+        return $this;
+    }
+
+    /**
+     * init関数
+     *
+     * 例)
+     *
+     * ``` php
+     * $value = (new Stream([1, 2, 3]))
+     *     ->init(); // [1, 2]
+     *     ->get();
+     * ```
+     *
+     * @return Stream
+     */
+    public function init()
+    {
+        $this->value = Collection::init($this->value);
         return $this;
     }
 
@@ -84,7 +122,7 @@ class Stream
      */
     public function map(callable $f)
     {
-        $this->value = Enumerable::map($f, $this->value);
+        $this->value = Collection::map($f, $this->value);
         return $this;
     }
 
@@ -105,7 +143,7 @@ class Stream
      */
     public function filter(callable $f)
     {
-        $this->value = Enumerable::filter($f, $this->value);
+        $this->value = Collection::filter($f, $this->value);
         return $this;
     }
 

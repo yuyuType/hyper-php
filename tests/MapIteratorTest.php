@@ -1,6 +1,6 @@
 <?php
 
-use Hyper\Data\Enumerator\MapIterator;
+use Hyper\Data\Collections\MapIterator;
 
 class MapIteratorTest extends PHPUnit_Framework_TestCase
 {
