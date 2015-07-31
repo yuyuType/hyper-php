@@ -248,6 +248,37 @@ class CollectionTest extends PHPUnit_Framework_TestCase
         $this->assertSame([4, 5], iterator_to_array($value));
     }
 
+    public function testTakeWhile()
+    {
+        $value = Collection::takeWhile(function ($x) { return $x < 3; }, [1,2,3,4,5,1,2,3]);
+        $this->assertSame([1, 2], iterator_to_array($value));
+
+        $value = Collection::takeWhile(function ($x) { return $x < 9; }, [1,2,3]);
+        $this->assertSame([1,2,3], iterator_to_array($value));
+
+        $value = Collection::takeWhile(function ($x) { return $x < 0; }, [1,2,3]);
+        $this->assertSame([], iterator_to_array($value));
+    }
+
+    public function testDropWhile()
+    {
+        $value = Collection::dropWhile(function ($x) { return $x < 3; }, [1,2,3,4,5,1,2,3]);
+        $this->assertSame([2 => 3, 3 => 4, 4 => 5, 5 => 1, 6 => 2, 7 => 3], iterator_to_array($value));
+
+        $value = Collection::dropWhile(function ($x) { return $x < 9; }, [1,2,3]);
+        $this->assertSame([], iterator_to_array($value));
+
+        $value = Collection::dropWhile(function ($x) { return $x < 0; }, [1,2,3]);
+        $this->assertSame([1,2,3], iterator_to_array($value));
+    }
+
+    public function testSpan()
+    {
+        $value = iterator_to_array(Collection::span(function ($x) { return $x < 3; }, [1,2,3,4,5,1,2,3]));
+        $this->assertSame([0 => 1, 1 => 2], iterator_to_array($value[0]));
+        $this->assertSame([2 => 3, 3 => 4, 4 => 5, 5 => 1, 6 => 2, 7 => 3], iterator_to_array($value[1]));
+    }
+
     public function testLookup()
     {
         $arr = ['val' => 1, 'val1' => 2];

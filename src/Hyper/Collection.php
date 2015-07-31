@@ -812,6 +812,116 @@ class Collection
     }
 
     /**
+     * splitAt
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param integer $n
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function splitAt($n, $xs)
+    {
+        return [take($n, $xs), drop($n, $xs)];
+    }
+
+    /**
+     * takeWhile
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $pred
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function takeWhile(callable $pred, $xs)
+    {
+        foreach (self::toIterator($xs) as $key => $value) {
+            if (call_user_func($pred, $value)) {
+                yield $key => $value;
+                continue;
+            }
+            break;
+        }
+    }
+
+    /**
+     * dropWhile
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $pred
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function dropWhile(callable $pred, $xs)
+    {
+        $it = self::toIterator($xs);
+        while ($it->valid()) {
+            if (call_user_func($pred, $it->current())) {
+                $it->next();
+                continue;
+            }
+            break;
+        }
+        while ($it->valid()) {
+            yield $it->key() => $it->current();
+            $it->next();
+        }
+    }
+
+    /**
+     * span
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $pred
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function span(callable $pred, $xs)
+    {
+        yield self::takeWhile($pred, $xs);
+        yield self::dropWhile($pred, $xs);
+    }
+
+    /**
+     * separate
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $pred
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function separate(callable $pred, $xs)
+    {
+        $p = function ($x) use ($pred) { return !call_user_func($pred, $x); };
+        yield self::takeWhile($p, $xs);
+        yield self::dropWhile($p, $xs);
+    }
+
+    /**
      * filter
      *
      * ex)
