@@ -2,6 +2,7 @@
 
 use Hyper\Data\Option;
 use Hyper\Collection;
+use Hyper\Func;
 
 class CollectionTest extends PHPUnit_Framework_TestCase
 {
@@ -176,7 +177,10 @@ class CollectionTest extends PHPUnit_Framework_TestCase
 
     public function testScan()
     {
-        $this->assertSame([1,1,2,6,24,120,720,5040,40320,362880,3628800], iterator_to_array(Collection::scan(function ($x, $y) { return $x * $y; }, 1, range(1, 10))));
+        $this->assertSame(
+            [1,1,2,6,24,120,720,5040,40320,362880,3628800],
+            iterator_to_array(Collection::scan(function ($x, $y) { return $x * $y; }, 1, range(1, 10)))
+        );
     }
 
     public function testScan1()
@@ -279,11 +283,132 @@ class CollectionTest extends PHPUnit_Framework_TestCase
         $this->assertSame([2 => 3, 3 => 4, 4 => 5, 5 => 1, 6 => 2, 7 => 3], iterator_to_array($value[1]));
     }
 
+    public function testGroup()
+    {
+        $group = Collection::group('Mississippi');
+        $this->assertSame(array('M'), iterator_to_array($group->current()));
+        $group->next();
+        $this->assertSame(array('i'), iterator_to_array($group->current()));
+        $group->next();
+        $this->assertSame(array('s', 's'), iterator_to_array($group->current()));
+        $group->next();
+        $this->assertSame(array('i'), iterator_to_array($group->current()));
+        $group->next();
+        $this->assertSame(array('s', 's'), iterator_to_array($group->current()));
+        $group->next();
+        $this->assertSame(array('i'), iterator_to_array($group->current()));
+        $group->next();
+        $this->assertSame(array('p', 'p'), iterator_to_array($group->current()));
+        $group->next();
+        $this->assertSame(array('i'), iterator_to_array($group->current()));
+        $group->next();
+        $this->assertFalse($group->valid());
+    }
+
     public function testLookup()
     {
         $arr = ['val' => 1, 'val1' => 2];
         $this->assertEquals(Option::Some(2), Collection::lookup('val1', $arr));
         $this->assertEquals(Option::Some(1), Collection::lookup('val', $arr));
         $this->assertEquals(Option::None(), Collection::lookup('none', $arr));
+    }
+
+    public function testFind()
+    {
+        $arr = ['val' => 1, 'val1' => 2];
+        $this->assertEquals(Option::Some(1), Collection::find(Func::bind('Hyper\Func::equal', 1), $arr));
+        $this->assertEquals(Option::Some(2), Collection::find(Func::bind('Hyper\Func::equal', 2), $arr));
+        $this->assertEquals(Option::None(), Collection::find(Func::bind('Hyper\Func::equal', 3), $arr));
+    }
+
+    public function testFilter()
+	{
+		$even = function ($x) {
+			return $x % 2 === 0;
+		};
+		$this->assertEquals(
+			array(array(1, 3, 5, 7, 9), array(2, 4, 6, 8, 10)),
+			Collection::toArray(Collection::partition(Collection::negate($even), range(1, 10)))
+		);
+    }
+
+    public function testZip()
+    {
+        $xs = range(0, 5);
+        $ys = range(6, 9);
+        $this->assertSame(
+            array(
+                array(0, 6),
+                array(1, 7),
+                array(2, 8),
+                array(3, 9),
+            ),
+            iterator_to_array(Collection::zip($xs, $ys))
+        );
+    }
+
+    public function testZip3()
+    {
+        $xs = range(0, 5);
+        $ys = range(6, 9);
+        $zs = range(10, 15);
+        $this->assertSame(
+            array(
+                array(0, 6, 10),
+                array(1, 7, 11),
+                array(2, 8, 12),
+                array(3, 9, 13),
+            ),
+            iterator_to_array(Collection::zip3($xs, $ys, $zs))
+        );
+    }
+
+    public function testZipWith()
+    {
+        $xs = range(0, 5);
+        $ys = range(6, 9);
+        $this->assertSame(
+            array(
+                0,
+                7,
+                16,
+                27,
+            ),
+            iterator_to_array(Collection::zipWith(function ($a, $b) { return $a * $b; }, $xs, $ys))
+        );
+    }
+
+    public function testUnzip()
+    {
+        $xs = range(0, 5);
+        $ys = range(6, 9);
+        $ziped = iterator_to_array(Collection::zip($xs, $ys));
+        $this->assertSame(
+            array(
+                array(0, 1, 2, 3),
+                array(6, 7, 8, 9),
+            ),
+            Collection::toArray(Collection::unzip($ziped))
+        );
+
+        $xs = range(0, 5);
+        $ys = range(6, 9);
+        $ziped = iterator_to_array(Collection::zip($xs, $ys));
+        $this->assertSame(
+            array(0, 1, 2, 3),
+            iterator_to_array(Collection::unzip($ziped)[0])
+        );
+        $this->assertSame(
+            array(6, 7, 8, 9),
+            iterator_to_array(Collection::unzip($ziped)[1])
+        );
+    }
+
+    public function testSort()
+    {
+        $xs = range(0, 5);
+        $ys = array_reverse($xs);
+        $sorted = Collection::sort($ys);
+        $this->assertSame($xs, $sorted);
     }
 }

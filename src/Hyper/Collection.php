@@ -43,6 +43,25 @@ class Collection
         throw new \LogicException("Cannot comvert to Iterator.");
     }
 
+    /**
+     * toArray
+     *
+     * @param mixed $iterator
+     * @return array
+     */
+    public static function toArray($iterator)
+    {
+        $result = array();
+        foreach ($iterator as $key => $it) {
+            if ($it instanceof \Traversable) {
+                $result[] = self::toArray($it);
+            } else {
+                $result[] = $it;
+            }
+        }
+        return $result;
+    }
+
     // Base functions
 
     /**
@@ -902,7 +921,7 @@ class Collection
     }
 
     /**
-     * separate
+     * separate(break)
      *
      * ex)
      *
@@ -922,23 +941,200 @@ class Collection
     }
 
     /**
-     * filter
+     * stripPrefix
      *
      * ex)
      *
      * ``` php
-     * $arr = [1, 2, 3];
-     * $value = Collection::filter(function ($x) { return $x % 2 === 0; }, $arr); // [2]
      * ```
      *
-     * @param callable $pred
-     * @param mixed $iterator
-     * @return FilterdIterator
+     * @param array|Traversable $xs
+     * @param array|Traversable $ys
+     * @retun Generator
      * @SuppressWarnings(PHPMD.ShortVariable)
      */
-    public static function filter(callable $pred, $iterator)
+    public static function stripPrefix($xs, $ys)
     {
-        return new \CallbackFilterIterator(self::toIterator($iterator), $pred);
+        // todo@not implimented
+    }
+
+    /**
+     * group
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function group($xs)
+    {
+        return self::groupBy(function ($a, $b) { return $a == $b; }, self::toIterator($xs));
+    }
+
+    /**
+     * groupBy
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $eq
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function groupBy(callable $eq, $xs)
+    {
+        foreach ($xs as $key => $value) {
+            if (!isset($prev)) {
+                $elem = new \ArrayObject(array($value));
+            } elseif (call_user_func($eq, $prev, $value) === true) {
+                $elem->append($value);
+            } else {
+                yield $elem;
+                $elem = new \ArrayObject(array($value));
+            }
+            $prev = $value;
+        }
+        yield $elem;
+    }
+
+    /**
+     * inits
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function inits($xs)
+    {
+        // todo@not implimented
+    }
+
+    /**
+     * tails
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @retun Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function tails($xs)
+    {
+        // todo@not implimented
+    }
+
+    // Predicates
+
+    /**
+     * isPrefixOf
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @param array|Traversable $ys
+     * @return boolean
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function isPrefixOf($xs, $ys)
+    {
+        // todo@not implimented
+    }
+
+    /**
+     * isSuffixOf
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @param array|Traversable $ys
+     * @return boolean
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function isSuffixOf($xs, $ys)
+    {
+        // todo@not implimented
+    }
+
+    /**
+     * isInfixOf
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @param array|Traversable $ys
+     * @return boolean
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function isInfixOf($xs, $ys)
+    {
+        // todo@not implimented
+    }
+
+    // Searching by equality
+
+    /**
+     * elem
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param mixed $x
+     * @param array|Traversable $xs
+     * @return boolean
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function elem($x, $xs)
+    {
+        foreach ($xs as $y) {
+            if ($x == $y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * notElem
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param mixed $x
+     * @param array|Traversable $xs
+     * @return boolean
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function notElem($x, $xs)
+    {
+        return !elem($x, $xs);
     }
 
     /**
@@ -964,5 +1160,333 @@ class Collection
             }
         }
         return Option::None();
+    }
+
+    // Searching with a predicate
+
+    /**
+     * find
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $pred
+     * @param array|Traversable $xs
+     * @return None|Some
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function find(callable $pred, $xs)
+    {
+        foreach ($xs as $x) {
+            if (call_user_func($pred, $x) === true) {
+                return Option::Some($x);
+            }
+        }
+        return Option::None();
+    }
+
+    /**
+     * filter
+     *
+     * ex)
+     *
+     * ``` php
+     * $arr = [1, 2, 3];
+     * $value = Collection::filter(function ($x) { return $x % 2 === 0; }, $arr); // [2]
+     * ```
+     *
+     * @param callable $pred
+     * @param mixed $iterator
+     * @return FilterdIterator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function filter(callable $pred, $iterator)
+    {
+        return new \CallbackFilterIterator(self::toIterator($iterator), $pred);
+    }
+
+    /**
+     * partition
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $pred
+     * @param mixed $iterator
+     * @return FilterdIterator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function partition(callable $pred, $xs)
+    {
+        $iterator = self::toIterator($xs);
+        return array(
+            new \CallbackFilterIterator($iterator, $pred),
+            new \CallbackFilterIterator($iterator, Func::negate($pred))
+        );
+    }
+
+    // Indexing lists
+
+    /**
+     * elemIndex
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param mixed $x
+     * @param array|Traversable $ys
+     * @return None|Some
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function elemIndex($x, $ys)
+    {
+        return findIndex(Func::bind('Hyoer\Func\equal', $x), $ys);
+    }
+
+    /**
+     * elemIndices
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param mixed $x
+     * @param array|Traversable $ys
+     * @return Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function elemIndices($x, $ys)
+    {
+        return findIndices(Func::bind('Hyoer\Func\equal', $x), $ys);
+    }
+
+    /**
+     * findIndex
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $pred
+     * @param array|Traversable $xs
+     * @return None|Some
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function findIndex($pred, $xs)
+    {
+        foreach ($xs as $key => $value) {
+            if (call_user_func($pred, $value) === true) {
+                return Option::Some($key);
+            }
+        }
+        return Option::None();
+    }
+
+    /**
+     * findIndices
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $pred
+     * @param array|Traversable $ys
+     * @return Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function findIndices($pred, $xs)
+    {
+        foreach ($xs as $key => $value) {
+            if (call_user_func($pred, $value) === true) {
+                yield $key;
+            }
+        }
+    }
+
+    // Zipping and unzipping lists
+
+    /**
+     * zip
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @param array|Traversable $ys
+     * @return Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function zip($xs, $ys)
+    {
+        $xIterator = self::toIterator($xs);
+        $yIterator = self::toIterator($ys);
+        while ($xIterator->valid() && $yIterator->valid()) {
+            yield array($xIterator->current(), $yIterator->current());
+            $xIterator->next();
+            $yIterator->next();
+        }
+    }
+
+    /**
+     * zip3
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @param array|Traversable $ys
+     * @param array|Traversable $zs
+     * @return Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function zip3($xs, $ys, $zs)
+    {
+        $xIterator = self::toIterator($xs);
+        $yIterator = self::toIterator($ys);
+        $zIterator = self::toIterator($zs);
+        while ($xIterator->valid() && $yIterator->valid() && $zIterator->valid()) {
+            yield array($xIterator->current(), $yIterator->current(), $zIterator->current());
+            $xIterator->next();
+            $yIterator->next();
+            $zIterator->next();
+        }
+    }
+
+    /**
+     * zipWith
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $f
+     * @param array|Traversable $xs
+     * @param array|Traversable $ys
+     * @return Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function zipWith($f, $xs, $ys)
+    {
+        $xIterator = self::toIterator($xs);
+        $yIterator = self::toIterator($ys);
+        while ($xIterator->valid() && $yIterator->valid()) {
+            yield call_user_func($f, $xIterator->current(), $yIterator->current());
+            $xIterator->next();
+            $yIterator->next();
+        }
+    }
+
+    /**
+     * zipWith3
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $f
+     * @param array|Traversable $xs
+     * @param array|Traversable $ys
+     * @param array|Traversable $zs
+     * @return Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function zipWith3($f, $xs, $ys, $zs)
+    {
+        $xIterator = self::toIterator($xs);
+        $yIterator = self::toIterator($ys);
+        $zIterator = self::toIterator($zs);
+        while ($xIterator->valid() && $yIterator->valid() && $zIterator->valid()) {
+            yield call_user_func($f, $xIterator->current(), $yIterator->current(), $zIterator->current());
+            $xIterator->next();
+            $yIterator->next();
+            $zIterator->next();
+        }
+    }
+
+    /**
+     * unzip
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xss
+     * @return Generator
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function unzip($xss)
+    {
+        $first = function ($xss) {
+            foreach ($xss as $xs) {
+                list ($first, $second)  = $xs;
+                yield $first;
+            }
+        };
+
+        $second = function ($xss) {
+            foreach ($xss as $xs) {
+                list ($first, $second)  = $xs;
+                yield $second;
+            }
+        };
+
+        return array(call_user_func($first, $xss), call_user_func($second, $xss));
+    }
+
+    // Ordered lists
+
+    /**
+     * sort
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param array|Traversable $xs
+     * @return array
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function sort($xs)
+    {
+        $sorted = self::toArray($xs);
+        sort($sorted);
+        return $sorted;
+    }
+
+    /**
+     * sortBy
+     *
+     * ex)
+     *
+     * ``` php
+     * ```
+     *
+     * @param callable $cmp
+     * @param array|Traversable $xs
+     * @return array
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function sortBy($cmp, $xs)
+    {
+        $sorted = self::toArray($xs);
+        usort($sorted, $cmp);
+        return $sorted;
     }
 }

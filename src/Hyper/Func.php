@@ -179,6 +179,32 @@ class Func
     }
 
     /**
+     * negate
+     *
+     * @param callable $f
+     * @return \Clojuer Object
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function negate($f)
+    {
+        return function () use ($f) {
+            return call_user_func_array($f, func_get_args());
+        };
+    }
+
+    /**
+     * equal
+     *
+     * @param callable $f
+     * @return \Clojuer Object
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
+    public static function equal($a, $b)
+    {
+        return $a == $b;
+    }
+
+    /**
      * 関数合成
      *
      * f(g(x)) == compose($f, $g)(x)
